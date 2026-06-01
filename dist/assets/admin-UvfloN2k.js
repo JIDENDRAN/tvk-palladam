@@ -1,0 +1,41 @@
+import"./header-BP8spMHJ.js";import{C as e,E as t,T as n,_ as r,n as i,o as a,s as o,t as s,w as c,x as l}from"./lucide-CzNDmPHw.js";function u(){s({icons:{ShieldCheck:o,Shield:a,Users:i,Clock:e,BrainCircuit:t,CheckCircle2:n,ClipboardList:c,Eye:l,Inbox:r}})}var d=``,f=[],p=null,m=document.getElementById(`login-container`),h=document.getElementById(`dashboard-container`),g=document.getElementById(`login-form`),_=document.getElementById(`username`),v=document.getElementById(`password`),y=document.getElementById(`login-error`),b=document.getElementById(`logout-btn`),x=document.getElementById(`refresh-btn`),S=document.getElementById(`grievances-tbody`),C=document.getElementById(`stat-total`),w=document.getElementById(`stat-pending`),T=document.getElementById(`stat-progress`),E=document.getElementById(`stat-resolved`),D=document.getElementById(`search-input`),O=document.getElementById(`filter-status`),k=document.getElementById(`filter-category`),A=document.getElementById(`details-modal`),j=document.querySelector(`.close-modal`),M=document.getElementById(`update-grievance-form`),N=document.getElementById(`delete-grievance-btn`);document.addEventListener(`DOMContentLoaded`,()=>{u(),F(),P()});function P(){g.addEventListener(`submit`,R),b.addEventListener(`click`,B),x.addEventListener(`click`,V),D.addEventListener(`input`,U),O.addEventListener(`change`,U),k.addEventListener(`change`,U),j.addEventListener(`click`,()=>{A.classList.remove(`active`)}),window.addEventListener(`click`,e=>{e.target===A&&A.classList.remove(`active`)}),M.addEventListener(`submit`,G),N.addEventListener(`click`,K)}async function F(){try{(await(await fetch(`${d}/api/admin/status`,{credentials:`include`})).json()).loggedIn?L():I()}catch(e){console.error(`Error checking authentication status:`,e),I()}}function I(){m.style.display=`flex`,h.style.display=`none`,b.style.display=`none`,y.style.display=`none`,_.value=``,v.value=``}function L(){m.style.display=`none`,h.style.display=`block`,b.style.display=`block`,V()}async function R(e){e.preventDefault();let t=_.value.trim(),n=v.value,r=document.getElementById(`login-submit-btn`);r.disabled=!0,r.textContent=`Authenticating...`,y.style.display=`none`;try{let e=await(await fetch(`${d}/api/admin/login`,{method:`POST`,headers:{"Content-Type":`application/json`},body:JSON.stringify({username:t,password:n}),credentials:`include`})).json();e.success?L():z(e.message||`Invalid username or password`)}catch(e){console.error(`Login error:`,e),z(`Network error. Make sure backend is running.`)}finally{r.disabled=!1,r.textContent=`Authenticate & Enter`}}function z(e){y.textContent=e,y.style.display=`block`}async function B(){if(confirm(`Are you sure you want to logout?`))try{await fetch(`${d}/api/admin/logout`,{method:`POST`,credentials:`include`}),I()}catch(e){console.error(`Logout error:`,e),I()}}async function V(){S.innerHTML=`
+    <tr class="loading-row">
+      <td colspan="8">
+        <div class="table-loading">
+          <span class="spinner"></span> Syncing database files...
+        </div>
+      </td>
+    </tr>
+  `;try{let e=await fetch(`${d}/api/admin/grievances`,{credentials:`include`});if(e.status===401){I();return}let t=await e.json();t.success?(f=t.data,H(),U()):console.error(`Failed to load grievances:`,t.message)}catch(e){console.error(`Error fetching grievances:`,e)}}function H(){let e=f.length,t=f.filter(e=>e.status===`Pending`).length,n=f.filter(e=>e.status===`In Progress`).length,r=f.filter(e=>e.status===`Resolved`).length;C.textContent=e,w.textContent=t,T.textContent=n,E.textContent=r}function U(){let e=D.value.trim().toLowerCase(),t=O.value,n=k.value,r=f.filter(r=>{let i=r.name.toLowerCase().includes(e)||r.phone.includes(e)||r.constituency.toLowerCase().includes(e)||`TVK-GR-2026-${String(r.id).padStart(4,`0`)}`.toLowerCase().includes(e)||r.description.toLowerCase().includes(e),a=t===`all`||r.status===t,o=n===`all`||r.category===n;return i&&a&&o});if(r.length===0){S.innerHTML=`
+      <tr>
+        <td colspan="8">
+          <div class="empty-state">
+            <i data-lucide="inbox"></i>
+            <p>No queries match your search or filter settings.</p>
+          </div>
+        </td>
+      </tr>
+    `,u();return}S.innerHTML=r.map(e=>{let t=`TVK-GR-2026-${String(e.id).padStart(4,`0`)}`,n=new Date(e.created_at).toLocaleString(`en-IN`,{day:`2-digit`,month:`short`,year:`numeric`,hour:`2-digit`,minute:`2-digit`}),r=e.status.toLowerCase().replace(` `,``),i=e.category.charAt(0).toUpperCase()+e.category.slice(1);return`
+      <tr>
+        <td><span class="track-id-badge">${t}</span></td>
+        <td><strong>${q(e.name)}</strong></td>
+        <td>
+          <a href="tel:${q(e.phone)}" style="text-decoration:none; color:inherit;">
+            ${q(e.phone)}
+          </a>
+        </td>
+        <td>${q(e.constituency)}</td>
+        <td><span style="font-weight:600; color:#555;">${q(i)}</span></td>
+        <td style="font-size:0.85rem; color:#666;">${n}</td>
+        <td>
+          <span class="status-badge ${r}">
+            ${e.status}
+          </span>
+        </td>
+        <td>
+          <button class="dashboard-btn btn-secondary view-details-btn" data-id="${e.id}" style="padding: 6px 12px; font-size: 0.8rem;">
+            <i data-lucide="eye"></i> View Detail
+          </button>
+        </td>
+      </tr>
+    `}).join(``),document.querySelectorAll(`.view-details-btn`).forEach(e=>{e.addEventListener(`click`,e=>{W(parseInt(e.currentTarget.getAttribute(`data-id`)))})}),u()}function W(e){if(p=f.find(t=>t.id===e),!p)return;let t=`TVK-GR-2026-${String(p.id).padStart(4,`0`)}`;document.getElementById(`modal-track-id`).textContent=t,document.getElementById(`modal-db-id`).value=p.id,document.getElementById(`modal-name`).textContent=p.name,document.getElementById(`modal-phone`).textContent=p.phone,document.getElementById(`modal-constituency`).textContent=p.constituency;let n=p.category.charAt(0).toUpperCase()+p.category.slice(1);document.getElementById(`modal-category`).textContent=n;let r=new Date(p.created_at).toLocaleString(`en-IN`,{day:`2-digit`,month:`long`,year:`numeric`,hour:`2-digit`,minute:`2-digit`,second:`2-digit`});document.getElementById(`modal-date`).textContent=r,document.getElementById(`modal-description`).textContent=p.description;let i=document.getElementById(`modal-photo-box`),a=document.getElementById(`modal-photo`),o=document.getElementById(`modal-photo-link`),s=document.getElementById(`modal-photo-name`);p.photo_data?(a.src=p.photo_data,o.href=p.photo_data,s.textContent=p.photo_name||`Uploaded grievance photo`,i.hidden=!1):(a.removeAttribute(`src`),o.href=`#`,s.textContent=``,i.hidden=!0),document.getElementById(`modal-status`).value=p.status,document.getElementById(`modal-notes`).value=p.admin_notes||``,A.classList.add(`active`),u()}async function G(e){e.preventDefault();let t=document.getElementById(`modal-db-id`).value,n=document.getElementById(`modal-status`).value,r=document.getElementById(`modal-notes`).value,i=M.querySelector(`button[type="submit"]`);i.disabled=!0,i.textContent=`Saving Updates...`;try{let e=await(await fetch(`${d}/api/admin/grievances/${t}`,{method:`PUT`,headers:{"Content-Type":`application/json`},body:JSON.stringify({status:n,admin_notes:r}),credentials:`include`})).json();e.success?(A.classList.remove(`active`),V()):alert(`Error: `+e.message)}catch(e){console.error(`Error updating grievance:`,e),alert(`Failed to update submission records due to network errors.`)}finally{i.disabled=!1,i.textContent=`Save Updates`}}async function K(){let e=document.getElementById(`modal-db-id`).value,t=document.getElementById(`modal-track-id`).textContent;if(confirm(`Are you absolutely sure you want to delete query ${t}? This cannot be undone.`))try{let t=await(await fetch(`${d}/api/admin/grievances/${e}`,{method:`DELETE`,credentials:`include`})).json();t.success?(A.classList.remove(`active`),V()):alert(`Error: `+t.message)}catch(e){console.error(`Error deleting grievance:`,e),alert(`Failed to delete query record due to network errors.`)}}function q(e){return e?e.replace(/&/g,`&amp;`).replace(/</g,`&lt;`).replace(/>/g,`&gt;`).replace(/"/g,`&quot;`).replace(/'/g,`&#039;`):``}
